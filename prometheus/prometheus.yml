@@ -1,0 +1,27 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: flower
+    static_configs:
+      - targets: ['flower:5555']
+  - job_name: 'cloudamqp-detailed'
+    basic_auth:
+      username: ${USERNAME}
+      password: ${PASSWORD}
+    scheme: https
+    # metrics_path needs to be specified for detailed metrics
+    metrics_path: "/metrics/per-object"
+    # family parameters specifying what detailed metrics to be available
+    # https://github.com/rabbitmq/rabbitmq-server/blob/master/deps/rabbitmq_prometheus/metrics-detailed.md
+    # params:
+    #   family:
+    #     - "queue_metrics"
+    #     - "channel_metrics"
+    # static_configs allows specifying a list of targets and a common label set for them.
+    static_configs:
+    - targets: ['${HTTP_BROKER_URL}']

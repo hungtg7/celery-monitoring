@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+
+  flower:
+    image: mher/flower
+    restart: always
+    command: /bin/sh -c "celery --broker=$BROKER_URL flower --monitoring --memory_units=mb"
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    env_file:
+      - .env
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      # - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana:/var/lib/grafana/dashboards
+      - ./grafana:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+      
+volumes:
+  grafana-data:
